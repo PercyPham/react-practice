@@ -1,15 +1,14 @@
 import React, { Component } from "react";
+import Layout from "./../../components/Layout";
+import BurgerBuilder from "./../../components/BurgerBuilder";
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
   render() {
     return (
       <div>
-        <h1>Hello, this is burger builder</h1>
+        <Layout>
+          <BurgerBuilder />
+        </Layout>
       </div>
     );
   }
