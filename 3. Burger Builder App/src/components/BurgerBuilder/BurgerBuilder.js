@@ -8,6 +8,8 @@ import {
   INGREDIENT_PRICES
 } from "./../../utils/constants";
 import BuildControls from "./BuildControls";
+import Modal from "./../../components/UI/Modal";
+import OrderSummary from "./../OrderSummary";
 
 class BurgerBuilder extends Component {
   state = {
@@ -17,7 +19,25 @@ class BurgerBuilder extends Component {
       [CHEESE]: 0,
       [MEAT]: 0
     },
-    totalPrice: 0
+    totalPrice: 0,
+    purchasing: false
+  };
+
+  purchasingHandler = () => {
+    this.setState({
+      purchasing: true
+    });
+  };
+
+  purchaseCancelHandler = () => {
+    this.setState({
+      purchasing: false
+    });
+  };
+
+  purchaseContinueHandler = () => {
+    console.log("You continue!!!");
+    alert("You continue!!!");
   };
 
   addIngredientHandler = type => {
@@ -62,11 +82,23 @@ class BurgerBuilder extends Component {
     }
     return (
       <React.Fragment>
+        <Modal
+          show={this.state.purchasing}
+          modalClosed={this.purchaseCancelHandler}
+        >
+          <OrderSummary
+            ingredients={this.state.ingredients}
+            price={this.state.totalPrice}
+            cancelPuchase={this.purchaseCancelHandler}
+            continuePurchase={this.purchaseContinueHandler}
+          />
+        </Modal>
         <Burger ingredients={this.state.ingredients} />
         <BuildControls
           price={this.state.totalPrice}
           addFunc={this.addIngredientHandler}
           removeFunc={this.removeIngredientHandler}
+          purchaseFunc={this.purchasingHandler}
           disabled={disabledInfo}
         />
       </React.Fragment>
