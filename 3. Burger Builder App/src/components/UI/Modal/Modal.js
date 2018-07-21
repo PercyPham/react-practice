@@ -1,6 +1,6 @@
 import React from "react";
 import classes from "./Modal.css";
-import Backdrop from "./components/Backdrop";
+import Backdrop from "./../Backdrop";
 
 const modal = props => (
   <React.Fragment>
