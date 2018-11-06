@@ -1,8 +1,9 @@
 import Head from "next/head";
-import Button from "@material-ui/core/Button";
+import PropTypes from "prop-types";
 import withLayout from "../lib/withLayout";
+import Button from "@material-ui/core/Button";
 
-const Index = () => (
+const Index = ({ user }) => (
   <div style={{ padding: "10px 45px" }}>
     <Head>
       <title>Index page</title>
@@ -12,8 +13,21 @@ const Index = () => (
       />
     </Head>
     <p>Content on Index page</p>
+    <p>Email: {user.email}</p>
     <Button variant="contained">MUI button</Button>
   </div>
 );
+
+Index.getInitialProps = async ({ query }) => ({ user: query.user });
+
+Index.propTypes = {
+  user: PropTypes.shape({
+    email: PropTypes.string.isRequired
+  })
+};
+
+Index.defaultProps = {
+  user: null
+};
 
 export default withLayout(Index);
