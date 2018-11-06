@@ -25,7 +25,7 @@ module.exports = {
         enforceForRenamedProperties: false
       }
     ],
-    "linebreak-style": ["error", "windows"],
+    "linebreak-style": ["error", "unix", "windows"],
     "import/prefer-default-export": "off",
     "jsx-a11y/anchor-is-valid": "off",
     "react/react-in-jsx-scope": "off",
