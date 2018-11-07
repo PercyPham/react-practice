@@ -8,8 +8,8 @@ import Header from "../components/Header";
 
 function withLayout(BaseComponent) {
   class App extends React.Component {
-    constructor(props, context) {
-      super(props, context);
+    constructor(props) {
+      super(props);
       this.pageContext = this.props.pageContext || getContext();
     }
 

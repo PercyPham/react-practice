@@ -4,10 +4,14 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Grid from "@material-ui/core/Grid";
 import Hidden from "@material-ui/core/Hidden";
 import Avatar from "@material-ui/core/Avatar";
-
+import Router from "next/router";
+import NProgress from "nprogress";
 import MenuDrop from "./MenuDrop";
-
 import { styleToolbar } from "./SharedStyles";
+
+Router.onRouteChangeStart = () => NProgress.start();
+Router.onRouteChangeComplete = () => NProgress.done();
+Router.onRouteChangeError = () => NProgress.done();
 
 const optionsMenu = [
   {
