@@ -2,7 +2,6 @@
   "name": "learnbuidlerbook",
   "version": "0.0.1",
   "description": "Practice project based on builderbook.org",
-  "main": "index.js",
   "author": "PercyPham <hungpm.percy@gmail.com> (www.phamminhhung.com)",
   "license": "UNLICENSED",
   "scripts": {
