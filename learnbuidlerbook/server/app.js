@@ -2,9 +2,10 @@ import dotenv from "dotenv";
 import express from "express";
 import next from "next";
 import mongoose from "mongoose";
-import User from "./models/User";
 import session from "express-session";
 import mongoSessionStore from "connect-mongo";
+import auth from "./google";
+import User from "./models/User";
 
 dotenv.config();
 
@@ -34,7 +35,7 @@ app.prepare().then(() => {
 
   const sess = {
     name: "builderbook.sid",
-    secret: "HD2w.)q*VqRT4/#NK2M/,E^B)}FED5fWU!dKe[wk",
+    secret: "cWZ5yIIq90DcYYJ",
     store: new MongoStore({
       mongooseConnection: mongoose.connection,
       ttl: 14 * 24 * 60 * 60 // save session 14 days
@@ -49,12 +50,7 @@ app.prepare().then(() => {
 
   server.use(session(sess));
 
-  server.get("/", async (req, res) => {
-    req.session.foo = "bar";
-    const user = await User.findOne({ slug: "team-builder-book" });
-    req.user = user;
-    app.render(req, res, "/");
-  });
+  auth({ server, ROOT_URL });
 
   server.get("*", (req, res) => handle(req, res));
 
