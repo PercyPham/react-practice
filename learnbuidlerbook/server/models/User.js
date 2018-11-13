@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 import lodashIsEmpty from "lodash.isempty";
 import lodashPick from "lodash.pick";
 import generateSlug from "../utils/slugify";
+import sendEmail from "../aws/sendEmail";
+import getEmailTemplate from "./EmailTemplate";
+import logger from "../utils/logs";
 
 const { Schema } = mongoose;
 
@@ -104,6 +107,23 @@ class UserClass {
       slug,
       isAdmin: userCount === 0
     });
+
+    const template = await getEmailTemplate("welcome", {
+      userName: displayName
+    });
+
+    try {
+      await sendEmail({
+        from: `Hung from LearnBuilder Book <${
+          process.env.EMAIL_SUPPORT_FROM_ADDRESS
+        }>`,
+        to: [email],
+        subject: template.subject,
+        body: template.message
+      });
+    } catch (err) {
+      logger.error("Email sending error:", err);
+    }
 
     return lodashPick(newUser, UserClass.publicFields());
   }
