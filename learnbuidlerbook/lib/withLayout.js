@@ -6,6 +6,8 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import getContext from "../lib/context";
 import Header from "../components/Header";
 
+import Notifier from "../components/Notifier";
+
 function withLayout(BaseComponent) {
   class App extends React.Component {
     constructor(props) {
@@ -30,6 +32,7 @@ function withLayout(BaseComponent) {
           <div>
             <Header {...this.props} />
             <BaseComponent {...this.props} />
+            <Notifier />
           </div>
         </MuiThemeProvider>
       );
