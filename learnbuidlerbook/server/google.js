@@ -66,7 +66,7 @@ function auth({ ROOT_URL, server }) {
     "/auth/google/callback",
     passport.authenticate("google", { failureRedirect: "/login" }),
     (_, res) => {
-      res.redirect("/");
+      res.redirect("/admin");
     }
   );
 

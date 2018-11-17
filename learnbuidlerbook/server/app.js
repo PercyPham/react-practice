@@ -6,6 +6,7 @@ import session from "express-session";
 import mongoSessionStore from "connect-mongo";
 import auth from "./google";
 import logger from "./utils/logs";
+import api from "./api";
 
 dotenv.config();
 
@@ -52,7 +53,20 @@ app.prepare().then(() => {
 
   auth({ server, ROOT_URL });
 
-  server.get("*", (req, res) => handle(req, res));
+  api(server);
+
+  const URL_MAP = {
+    "/login": "/public/login"
+  };
+
+  server.get("*", (req, res) => {
+    const url = URL_MAP[req.path];
+    if (url) {
+      app.render(req, res, url);
+    } else {
+      handle(req, res);
+    }
+  });
 
   server.listen(port, err => {
     if (err) throw err;
