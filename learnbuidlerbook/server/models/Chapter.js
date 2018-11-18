@@ -1,6 +1,102 @@
 import mongoose from "mongoose";
-import Book from "./Book";
+import marked from "marked";
+import he from "he";
+import hljs from "highlight.js";
 import generateSlug from "../utils/slugify";
+import Book from "./Book";
+
+function markdownToHtml(content) {
+  const renderer = new marked.Renderer();
+
+  renderer.link = (href, title, text) => {
+    const t = title ? ` title="${title}"` : "";
+    return `<a target="_blank" href="${href}" rel="noopener noreferrer"${t}>${text}</a>`;
+  };
+
+  renderer.image = href => `<img
+    src="${href}"
+    style="border: 1px solid #ddd;"
+    width="100%"
+    alt="Builder Book"
+  >`;
+
+  renderer.heading = (text, level) => {
+    const escapedText = text
+      .trim()
+      .toLowerCase()
+      .replace(/[^\w]+/g, "-");
+
+    if (level === 2) {
+      return `<h${level} class="chapter-section" style="color: #222; font-weight: 400;">
+        <a
+          name="${escapedText}"
+          href="#${escapedText}"
+          style="color: #222;"
+        > 
+          <i class="material-icons" style="vertical-align: middle; opacity: 0.5; cursor: pointer;">link</i>
+        </a>
+        <span class="section-anchor" name="${escapedText}">
+          ${text}
+        </span>
+      </h${level}>`;
+    }
+
+    if (level === 4) {
+      return `<h${level} style="color: #222;">
+        <a
+          name="${escapedText}"
+          href="#${escapedText}"
+          style="color: #222;"
+        >
+          <i class="material-icons" style="vertical-align: middle; opacity: 0.5; cursor: pointer;">link</i>
+        </a>
+        ${text}
+      </h${level}>`;
+    }
+
+    return `<h${level} style="color: #222; font-weight: 400;">${text}</h${level}>`;
+  };
+
+  marked.setOptions({
+    renderer,
+    breaks: true,
+    highlight(code, lang) {
+      if (!lang) {
+        return hljs.highlightAuto(code).value;
+      }
+
+      return hljs.highlight(lang, code).value;
+    }
+  });
+
+  return marked(he.decode(content));
+}
+
+function getSections(content) {
+  const renderer = new marked.Renderer();
+
+  const sections = [];
+  renderer.heading = (text, level) => {
+    if (level !== 2) {
+      return;
+    }
+
+    const escapedText = text
+      .trim()
+      .toLowerCase()
+      .replace(/[^\w]+/g, "-");
+
+    sections.push({ text, level, escapedText });
+  };
+
+  marked.setOptions({
+    renderer
+  });
+
+  marked(he.decode(content));
+
+  return sections;
+}
 
 const { Schema } = mongoose;
 
@@ -14,6 +110,9 @@ const mongoSchema = new Schema({
     required: true,
     default: false
   },
+  githubFilePath: {
+    type: String
+  },
   title: {
     type: String,
     required: true
@@ -21,6 +120,10 @@ const mongoSchema = new Schema({
   slug: {
     type: String,
     required: true
+  },
+  excerpt: {
+    type: String,
+    default: ""
   },
   content: {
     type: String,
@@ -32,48 +135,29 @@ const mongoSchema = new Schema({
     default: "",
     required: true
   },
-  excerpt: {
-    type: String,
-    default: ""
-  },
-  htmlExcerpt: {
-    type: String,
-    default: ""
-  },
   createdAt: {
     type: Date,
     required: true
-  },
-  githubFilePath: {
-    type: String
   },
   order: {
     type: Number,
     required: true
   },
   seoTitle: String,
-  seoDescription: String,
-  sections: [
-    {
-      text: String,
-      level: Number,
-      escapedText: String
-    }
-  ]
+  seoDescription: String
 });
 
 class ChapterClass {
-  static async getBySlug({ bookSlug, chapterSlug }) {
-    const book = await Book.getBySlug({ slug: bookSlug });
-
+  static async getBySlug({ bookSlug, chapterSlug, userId }) {
+    const book = await Book.getBySlug({ slug: bookSlug, userId });
     if (!book) {
-      throw new Error("Not found");
+      throw new Error("Book not found");
     }
 
     const chapter = await this.findOne({ bookId: book._id, slug: chapterSlug });
 
     if (!chapter) {
-      throw new Error("Not found");
+      throw new Error("Chapter not found");
     }
 
     const chapterObj = chapter.toObject();
