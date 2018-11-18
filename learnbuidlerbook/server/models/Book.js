@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import to from "await-to-js";
 import generateSlug from "../utils/slugify";
+import Chapter from "./Chapter";
 
 const { Schema } = mongoose;
 

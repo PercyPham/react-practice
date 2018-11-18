@@ -10,8 +10,7 @@ export default async function sendRequest(path, opts = {}) {
 
   const response = await fetch(
     `${ROOT_URL}${path}`,
-    // Object.assign({ method: "POST", credentials: "include" }, opts, {
-    Object.assign({ method: "POST" }, opts, {
+    Object.assign({ method: "POST", credentials: "include" }, opts, {
       headers
     })
   );

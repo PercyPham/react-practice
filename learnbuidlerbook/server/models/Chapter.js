@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Book from "./Book";
 
 const { Schema } = mongoose;
 

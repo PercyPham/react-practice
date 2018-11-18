@@ -55,11 +55,15 @@ app.prepare().then(() => {
 
   api(server);
 
-  const URL_MAP = {
-    "/login": "/public/login"
-  };
+  server.get("/books/:bookSlug/:chapterSlug", (req, res) => {
+    const { bookSlug, chapterSlug } = req.params;
+    app.render(req, res, "/public/read-chapter", { bookSlug, chapterSlug });
+  });
 
   server.get("*", (req, res) => {
+    const URL_MAP = {
+      "/login": "/public/login"
+    };
     const url = URL_MAP[req.path];
     if (url) {
       app.render(req, res, url);
