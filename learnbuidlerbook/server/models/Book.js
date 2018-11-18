@@ -1,7 +1,12 @@
-import mongoose from "mongoose";
 import to from "await-to-js";
+import mongoose from "mongoose";
+import frontmatter from "front-matter";
+
 import generateSlug from "../utils/slugify";
 import Chapter from "./Chapter";
+
+import { getCommits, getContent } from "../github";
+import logger from "../logs";
 
 const { Schema } = mongoose;
 
@@ -91,6 +96,71 @@ class BookClass {
     const editedBook = await this.findById(id, "slug");
 
     return editedBook;
+  }
+
+  static async syncContent({ id, githubAccessToken }) {
+    const book = await this.findById(id, "githubRepo githubLastCommitSha");
+
+    if (!book) {
+      throw new Error("Book not found");
+    }
+
+    const lastCommit = await getCommits({
+      accessToken: githubAccessToken,
+      repoName: book.githubRepo,
+      limit: 1
+    });
+
+    if (!lastCommit || !lastCommit.data || !lastCommit.data[0]) {
+      throw new Error("No change in content!");
+    }
+
+    const lastCommitSha = lastCommit.data[0].sha;
+    if (lastCommitSha === book.githubLastCommitSha) {
+      throw new Error("No change in content!");
+    }
+
+    const mainFolder = await getContent({
+      accessToken: githubAccessToken,
+      repoName: book.githubRepo,
+      path: ""
+    });
+
+    await Promise.all(
+      mainFolder.data.map(async f => {
+        if (f.type !== "file") {
+          return;
+        }
+
+        if (
+          f.path !== "introduction.md" &&
+          !/chapter-([0-9]+)\.md/.test(f.path)
+        ) {
+          return;
+        }
+
+        const chapter = await getContent({
+          accessToken: githubAccessToken,
+          repoName: book.githubRepo,
+          path: f.path
+        });
+
+        const data = frontmatter(
+          Buffer.from(chapter.data.content, "base64").toString("utf8")
+        );
+
+        data.path = f.path;
+
+        try {
+          await Chapter.syncContent({ book, data });
+          logger.info("Content is synced", { path: f.path });
+        } catch (error) {
+          logger.error("Content sync has error", { path: f.path, error });
+        }
+      })
+    );
+
+    return book.updateOne({ githubLastCommitSha: lastCommitSha });
   }
 }
 
