@@ -4,15 +4,15 @@ import Router from "next/router";
 
 let globalUser = null;
 
-function withAuth(
-  BaseComponent,
-  { loginRequired = true, logoutRequired = false } = {}
-) {
-  class App extends React.Component {
+export default (
+  Page,
+  { loginRequired = true, logoutRequired = false, adminRequired = false } = {}
+) =>
+  class BaseComponent extends React.Component {
     static propTypes = {
       user: PropTypes.shape({
-        displayName: PropTypes.string,
-        email: PropTypes.string.isRequired
+        id: PropTypes.string,
+        isAdmin: PropTypes.bool
       }),
       isFromServer: PropTypes.bool.isRequired
     };
@@ -28,15 +28,17 @@ function withAuth(
         globalUser = user;
       }
 
-      const userLoggedIn = !!user;
-
-      if (loginRequired && !logoutRequired && !userLoggedIn) {
-        Router.push("/login");
+      if (loginRequired && !logoutRequired && !user) {
+        Router.push("/public/login", "/login");
         return;
       }
 
-      if (logoutRequired && userLoggedIn) {
+      if (logoutRequired && user) {
         Router.push("/");
+      }
+
+      if (adminRequired && (!user || !user.isAdmin)) {
+        Router.push("/customer/my-books", "/my-books");
       }
     }
 
@@ -47,35 +49,33 @@ function withAuth(
         : globalUser;
 
       if (isFromServer && user) {
-        // Convert "_id"(ObjectID from MongoDB) object to string
         user._id = user._id.toString();
       }
 
       const props = { user, isFromServer };
 
-      if (BaseComponent.getInitialProps) {
-        Object.assign(props, (await BaseComponent.getInitialProps(ctx)) || {});
+      if (Page.getInitialProps) {
+        Object.assign(props, (await Page.getInitialProps(ctx)) || {});
       }
 
       return props;
     }
 
     render() {
-      const { user: userLoggedIn } = this.props;
+      const { user } = this.props;
 
-      if (loginRequired && !logoutRequired && !userLoggedIn) {
+      if (loginRequired && !logoutRequired && !user) {
         return null;
       }
 
-      if (logoutRequired && userLoggedIn) {
+      if (logoutRequired && user) {
         return null;
       }
 
-      return <BaseComponent {...this.props} />;
+      if (adminRequired && (!user || !user.isAdmin)) {
+        return null;
+      }
+
+      return <Page {...this.props} />;
     }
-  }
-
-  return App;
-}
-
-export default withAuth;
+  };

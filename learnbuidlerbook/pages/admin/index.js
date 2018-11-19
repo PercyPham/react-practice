@@ -2,6 +2,8 @@ import { Component } from "react";
 import PropTypes from "prop-types";
 import Link from "next/link";
 
+import Button from "@material-ui/core/Button";
+
 import notify from "../../lib/notifier";
 
 import withLayout from "../../lib/withLayout";
@@ -13,6 +15,9 @@ const Index = ({ books }) => (
     <div>
       <h2>Books</h2>
       <ul>
+        <Link href="/admin/add-book">
+          <Button variant="contained">Add book</Button>
+        </Link>
         {books.map(book => (
           <li key={book._id}>
             <Link

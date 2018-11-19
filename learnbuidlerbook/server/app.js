@@ -7,6 +7,8 @@ import mongoSessionStore from "connect-mongo";
 import auth from "./google";
 import logger from "./utils/logs";
 import api from "./api";
+import routesWithSlug from "./routesWithSlug";
+import { setupGithub as github } from "./github";
 
 dotenv.config();
 
@@ -32,6 +34,8 @@ const handle = app.getRequestHandler();
 app.prepare().then(() => {
   const server = express();
 
+  server.use(express.json());
+
   const MongoStore = mongoSessionStore(session);
 
   const sess = {
@@ -52,8 +56,9 @@ app.prepare().then(() => {
   server.use(session(sess));
 
   auth({ server, ROOT_URL });
-
+  github({ server });
   api(server);
+  routesWithSlug({ server, app });
 
   server.get("/books/:bookSlug/:chapterSlug", (req, res) => {
     const { bookSlug, chapterSlug } = req.params;
@@ -62,7 +67,8 @@ app.prepare().then(() => {
 
   server.get("*", (req, res) => {
     const URL_MAP = {
-      "/login": "/public/login"
+      "/login": "/public/login",
+      "/my-books": "/customer/my-books"
     };
     const url = URL_MAP[req.path];
     if (url) {
