@@ -1,7 +1,5 @@
 import PropTypes from "prop-types";
 import Link from "next/link";
-import Router from "next/router";
-import NProgress from "nprogress";
 import Toolbar from "@material-ui/core/Toolbar";
 import Grid from "@material-ui/core/Grid";
 import Hidden from "@material-ui/core/Hidden";
@@ -9,14 +7,7 @@ import Button from "@material-ui/core/Button";
 import Avatar from "@material-ui/core/Avatar";
 
 import MenuDrop from "./MenuDrop";
-
-import { styleToolbar } from "./SharedStyles";
-
-Router.onRouteChangeStart = () => {
-  NProgress.start();
-};
-Router.onRouteChangeComplete = () => NProgress.done();
-Router.onRouteChangeError = () => NProgress.done();
+import { styleToolbar, styleRaisedButton } from "./SharedStyles";
 
 const optionsMenuCustomer = [
   {
@@ -41,9 +32,17 @@ const optionsMenuAdmin = [
   }
 ];
 
-function Header({ user }) {
+function Header({ user, hideHeader }) {
   return (
-    <div>
+    <div
+      style={{
+        overflow: "hidden",
+        position: "relative",
+        display: "block",
+        top: hideHeader ? "-64px" : "0px",
+        transition: "top 0.5s ease-in"
+      }}
+    >
       <Toolbar style={styleToolbar}>
         <Grid
           container
@@ -51,7 +50,7 @@ function Header({ user }) {
           justify="space-around"
           alignItems="center"
         >
-          <Grid item sm={9} xs={8} style={{ textAlign: "left" }}>
+          <Grid item sm={8} xs={7} style={{ textAlign: "left" }}>
             {!user ? (
               <Link prefetch href="/">
                 <Avatar
@@ -66,14 +65,18 @@ function Header({ user }) {
             {user && user.isAdmin && !user.isGithubConnected ? (
               <Hidden smDown>
                 <a href="/auth/github">
-                  <Button variant="contained" color="primary">
+                  <Button
+                    variant="raised"
+                    color="primary"
+                    style={styleRaisedButton}
+                  >
                     Connect Github
                   </Button>
                 </a>
               </Hidden>
             ) : null}
           </Grid>
-          <Grid item sm={1} xs={2} style={{ textAlign: "right" }}>
+          <Grid item sm={2} xs={3} style={{ textAlign: "right" }}>
             {user ? (
               <div style={{ whiteSpace: " nowrap" }}>
                 {!user.isAdmin ? (
@@ -107,11 +110,13 @@ Header.propTypes = {
   user: PropTypes.shape({
     avatarUrl: PropTypes.string,
     displayName: PropTypes.string
-  })
+  }),
+  hideHeader: PropTypes.bool
 };
 
 Header.defaultProps = {
-  user: null
+  user: null,
+  hideHeader: false
 };
 
 export default Header;

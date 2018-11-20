@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import Error from "next/error";
 import Head from "next/head";
-import throttle from "lodash/throttle";
+import lodashThrottle from "lodash.throttle";
 import FormatListBulleted from "@material-ui/icons/FormatListBulleted";
 
 import Link from "next/link";
@@ -97,7 +97,7 @@ class ReadChapter extends React.Component {
       .removeEventListener("scroll", this.onScroll);
   }
 
-  onScroll = throttle(() => {
+  onScroll = lodashThrottle(() => {
     this.onScrollActiveSection();
     this.onScrollHideHeader();
   }, 500);

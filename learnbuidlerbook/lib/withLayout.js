@@ -2,16 +2,21 @@ import React from "react";
 import PropTypes from "prop-types";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import Router from "next/router";
+import NProgress from "nprogress";
 
 import getContext from "../lib/context";
+import Notifier from "../components/Notifier";
 import Header from "../components/Header";
 
-import Notifier from "../components/Notifier";
+Router.onRouteChangeStart = () => NProgress.start();
+Router.onRouteChangeComplete = () => NProgress.done();
+Router.onRouteChangeError = () => NProgress.done();
 
-function withLayout(BaseComponent) {
+function withLayout(BaseComponent, { noHeader = false } = {}) {
   class App extends React.Component {
-    constructor(props) {
-      super(props);
+    constructor(props, context) {
+      super(props, context);
       this.pageContext = this.props.pageContext || getContext();
     }
 
@@ -30,7 +35,7 @@ function withLayout(BaseComponent) {
         >
           <CssBaseline />
           <div>
-            <Header {...this.props} />
+            {noHeader ? null : <Header {...this.props} />}
             <BaseComponent {...this.props} />
             <Notifier />
           </div>
