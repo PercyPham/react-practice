@@ -1,7 +1,16 @@
 import React from "react";
+import htmlescape from "htmlescape";
 import Document, { Head, Main, NextScript } from "next/document";
 import JssProvider from "react-jss/lib/JssProvider";
 import getContext from "../lib/context";
+
+const dev = process.env.NODE_ENV !== "production";
+
+const StripePublishableKey = dev
+  ? process.env.Stripe_Test_PublishableKey
+  : process.env.Stripe_Live_PublishableKey;
+
+const env = { StripePublishableKey };
 
 class MyDocument extends Document {
   render() {
@@ -80,6 +89,9 @@ class MyDocument extends Document {
           }}
         >
           <Main />
+          <script
+            dangerouslySetInnerHTML={{ __html: `__ENV__ = ${htmlescape(env)}` }}
+          />
           <NextScript />
         </body>
       </html>
