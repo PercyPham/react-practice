@@ -40,14 +40,14 @@ const mongoSchema = new Schema({
   },
   displayName: String,
   avatarUrl: String,
-
   isGithubConnected: {
     type: Boolean,
     default: false
   },
   githubAccessToken: {
     type: String
-  }
+  },
+  purchasedBookIds: [String]
 });
 
 class UserClass {
@@ -59,7 +59,8 @@ class UserClass {
       "avatarUrl",
       "slug",
       "isAdmin",
-      "isGithubConnected"
+      "isGithubConnected",
+      "purchasedBookIds"
     ];
   }
 

@@ -54,7 +54,7 @@ function auth({ ROOT_URL, server }) {
   server.use(passport.initialize());
   server.use(passport.session());
 
-  server.get("/auth/google", (req, res) => {
+  const setFinalUrlInSessionToRedirectUrlQueryParam = (req, res, next) => {
     if (
       req.query &&
       req.query.redirectUrl &&
@@ -64,12 +64,17 @@ function auth({ ROOT_URL, server }) {
     } else {
       req.session.finalUrl = null;
     }
+    next();
+  };
 
+  server.get(
+    "/auth/google",
+    setFinalUrlInSessionToRedirectUrlQueryParam,
     passport.authenticate("google", {
       scope: ["profile", "email"],
       prompt: "select_account"
-    })(req, res);
-  });
+    })
+  );
 
   server.get(
     "/auth/google/callback",
