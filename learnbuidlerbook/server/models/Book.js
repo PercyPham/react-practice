@@ -11,6 +11,7 @@ import { getCommits, getContent } from "../github";
 import { stripeCharge } from "../stripe";
 import getEmailTemplate from "./EmailTemplate";
 import sendEmail from "../aws";
+import subscribe from "../mailchimp";
 import logger from "../utils/logs";
 
 const ROOT_URL =
@@ -215,6 +216,12 @@ class BookClass {
       });
     } catch (error) {
       logger.error("Email sending error:", error);
+    }
+
+    try {
+      await subscribe({ email: user.email });
+    } catch (mailchimpErr) {
+      logger.error("Mailchimp error:", mailchimpErr);
     }
 
     return Purchase.create({
